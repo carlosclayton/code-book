@@ -7,6 +7,9 @@
             "email": "carlos.clayton@gmail.com"
         }
     ],
+    "require": {
+      "doctrine/dbal": "~2.3"
+    },
     "licence":"MIT",
     "autoload": {
         "psr-4": {
