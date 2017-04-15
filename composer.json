@@ -7,6 +7,7 @@
             "email": "carlos.clayton@gmail.com"
         }
     ],
+    "licence":"MIT",
     "autoload": {
         "psr-4": {
             "CodeEduBook\\": ""
