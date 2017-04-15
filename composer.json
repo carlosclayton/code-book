@@ -1,0 +1,15 @@
+{
+    "name": "codeedu/codeedubook",
+    "description": "",
+    "authors": [
+        {
+            "name": "Carlos Clayton",
+            "email": "carlos.clayton@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "CodeEduBook\\": ""
+        }
+    }
+}
