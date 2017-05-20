@@ -6,6 +6,12 @@ use CodeEduBook\Http\Requests\CategoryCreateRequest;
 use CodeEduBook\Http\Requests\CategoryUpdateRequest;
 use CodeEduBook\Http\Requests\CategoryRequest;
 use CodeEduBook\Repositories\CategoryRepository;
+use CodeEduUser\Annotations\Mapping as Permission;
+
+/**
+ *
+ * @Permission\ControllerAnnotation(name="category-admin", description="Categories administration")
+ */
 
 class CategoriesController extends Controller
 {
@@ -24,6 +30,7 @@ class CategoriesController extends Controller
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
+     * @Permission\ActionAnnotation(name="list", description="Category list")
      */
     public function index()
     {
@@ -36,6 +43,7 @@ class CategoriesController extends Controller
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
+     * @Permission\ActionAnnotation(name="create", description="Category create")
      */
     public function create()
     {
@@ -47,6 +55,7 @@ class CategoriesController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
+     * @Permission\ActionAnnotation(name="store", description="Category store")
      */
     public function store(CategoryCreateRequest $request)
     {
@@ -65,6 +74,7 @@ class CategoriesController extends Controller
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
+     * @Permission\ActionAnnotation(name="edit", description="Category edit")
      */
     public function edit($id)
     {
@@ -79,6 +89,7 @@ class CategoriesController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
+     * @Permission\ActionAnnotation(name="update", description="Category update")
      */
     public function update(CategoryUpdateRequest $request, $id)
     {
@@ -95,6 +106,7 @@ class CategoriesController extends Controller
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
+     * @Permission\ActionAnnotation(name="destroy", description="Category destroy")
      */
     public function destroy($id)
     {

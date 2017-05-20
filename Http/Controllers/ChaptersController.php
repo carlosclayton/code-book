@@ -3,35 +3,40 @@
 namespace CodeEduBook\Http\Controllers;
 
 use CodeEduBook\Criteria\FindByAuthorCriteria;
+use CodeEduBook\Criteria\FindByBookCriteria;
 use CodeEduBook\Criteria\FindByTitle;
-use CodeEduBook\Criteria\FindByTitleCriteria;
 use CodeEduBook\Http\Requests\BookCreateRequest;
 use CodeEduBook\Http\Requests\BookUpdateRequest;
-use CodeEduBook\Models\Book;
 use CodeEduBook\Http\Requests\BookRequest;
+use CodeEduBook\Http\Requests\ChapterCreateRequest;
 use CodeEduBook\Repositories\BookRepository;
-use CodeEduBook\Repositories\CategoryRepository;
+use CodeEduBook\Repositories\ChapterRepository;
 use Illuminate\Http\Request;
+use CodeEduBook\Models\Book;
 
 use CodeEduUser\Annotations\Mapping as Permission;
 
 /**
  *
- * @Permission\ControllerAnnotation(name="book-admin", description="Books administration")
+ * @Permission\ControllerAnnotation(name="chapter-admin", description="Chapters administration")
  */
 
-class BooksController extends Controller
+class ChaptersController extends Controller
 {
     private $repository;
-    private $categoryRepository;
+    private $bookRepository;
+
     /**
      * BooksController constructor.
+     * @param BookRepository $repository
+     * @param ChapterRepository $categoryRepository
      */
-    public function __construct(BookRepository $repository, CategoryRepository $categoryRepository)
+    public function __construct(ChapterRepository  $repository,  BookRepository $bookRepository)
     {
         $this->repository = $repository;
-        $this->repository->pushCriteria(new FindByAuthorCriteria());
-        $this->categoryRepository = $categoryRepository;
+        $this->bookRepository = $bookRepository;
+        $this->bookRepository->pushCriteria(new FindByAuthorCriteria());
+
     }
 
 
@@ -39,27 +44,27 @@ class BooksController extends Controller
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
-     * @Permission\ActionAnnotation(name="list", description="Books list")
+     * @Permission\ActionAnnotation(name="list", description="Chapter list")
      */
-    public function index(Request $request)
+    public function index(Request $request, Book $book)
     {
         $search = $request->get('search');
-        //$this->repository->pushCriteria(new FindByAuthorCriteria());
-        $books = $this->repository->paginate(5);
-        return view('codeedubook::books.index', compact('books', 'search'));
+        //$book = $this->bookRepository->find($id);
+        $this->repository->pushCriteria(new FindByBookCriteria($book->id));
+        $chapters = $this->repository->paginate(5);
+        return view('codeedubook::chapters.index', compact('chapters', 'search', 'book'));
     }
 
     /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
-     * @Permission\ActionAnnotation(name="create", description="Book create")
+     * @Permission\ActionAnnotation(name="create", description="Chapter create")
      */
-    public function create()
+    public function create(Book $book)
     {
-        $author = \Auth::user()->name;
-        $categories = $this->categoryRepository->listsWithMutators('name_trashed', 'id');
-        return view('codeedubook::books.create', compact('author','categories'));
+        //$book = $this->bookRepository->find($id);
+        return view('codeedubook::chapters.create', compact('book'));
     }
 
     /**
@@ -67,14 +72,14 @@ class BooksController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
-     * @Permission\ActionAnnotation(name="store", description="Store book")
+     * @Permission\ActionAnnotation(name="store", description="Store Chapter")
      */
-    public function store(BookCreateRequest $request)
+    public function store(ChapterCreateRequest $request, Book $book)
     {
         $data = $request->all();
-        $data['author_id'] = \Auth::user()->id;
+        $data['book_id'] = $book->id;
         $this->repository->create($data);
-        $url = $request->get('redirect_to', route('books.index'));
+        $url = $request->get('redirect_to', route('chapters.index',['book' => $book->id]));
         $request->session()->flash('message', 'Created successfully');
         return redirect()->to($url);
 
@@ -85,16 +90,13 @@ class BooksController extends Controller
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
-     * @Permission\ActionAnnotation(name="edit", description="Edit book")
+     * @Permission\ActionAnnotation(name="edit", description="Edit Chapter")
      */
-    public function edit($id)
+    public function edit(Book $book, $chapterId)
     {
-        $book = $this->repository->find($id);
-        $this->categoryRepository->withTrashed();
-        $author = $book->author->name;
-        $categories = $this->categoryRepository->listsWithMutators('name_trashed', 'id');
-
-        return view('codeedubook::books.edit', compact('book','author', 'categories'));
+        $this->repository->pushCriteria(new FindByBookCriteria($book->id));
+        $chapter = $this->repository->find($chapterId);
+        return view('codeedubook::chapters.edit', compact('book', 'chapter'));
     }
 
     /**
@@ -103,7 +105,7 @@ class BooksController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
-     * @Permission\ActionAnnotation(name="update", description="Update book")
+     * @Permission\ActionAnnotation(name="update", description="Update Chapter")
      */
     public function update(BookUpdateRequest $request, $id)
     {
@@ -120,7 +122,7 @@ class BooksController extends Controller
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
-     * @Permission\ActionAnnotation(name="destroy", description="Destroy book")
+     * @Permission\ActionAnnotation(name="destroy", description="Destroy Chapter")
      */
     public function destroy($id)
     {

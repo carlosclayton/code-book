@@ -22,6 +22,12 @@ class FindByAuthorCriteria implements CriteriaInterface
      */
     public function apply($model, RepositoryInterface $repository)
     {
-        return $model->where('author_id', \Auth::user()->id);
+
+
+        if(!\Auth::user()->can(config('codeedubook.acl.permissions.name') . "/"  . config('codeedubook.acl.permissions.resource_name'))){
+            return $model->where('author_id', \Auth::user()->id);
+        }
+        return $model;
+
     }
 }
